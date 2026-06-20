@@ -29,32 +29,6 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
           </div>
 
-          <!-- Service Filter -->
-          <div class="relative">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Service</label>
-            <div class="relative">
-              <input :value="serviceDisplay" @focus="showServiceDropdown = true" @input="filterServiceOptions"
-                type="text"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
-              <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-              <div v-if="showServiceDropdown"
-                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                <div @click="selectService('')" class="px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
-                  :class="{ 'bg-blue-100': filters.service_id === '' }">
-                  All Services
-                </div>
-                <div v-for="service in filteredServiceOptions" :key="service.id" @click="selectService(service.id)"
-                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors"
-                  :class="{ 'bg-blue-100': filters.service_id === service.id }">
-                  {{ service.name }}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Availability Filter -->
           <div class="relative">
             <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
@@ -176,9 +150,7 @@
                     </span>
                   </div>
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Services
-                </th>
+
                 <th @click="sortTable('is_available')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none">
                   <div class="flex items-center">
@@ -251,18 +223,7 @@
                   <div class="text-sm text-gray-900">{{ mapper.post_code || '' }}</div>
                   <!-- <div class="text-sm text-gray-500">{{ mapper.address || '' }}</div> -->
                 </td>
-                <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-1">
-                    <span v-for="service in (mapper?.services || []).slice(0, 2)" :key="service.id"
-                      class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                      {{ service?.service?.name || '' }}
-                    </span>
-                    <span v-if="(mapper.services || []).length > 2"
-                      class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                      +{{ mapper.services.length - 2 }} more
-                    </span>
-                  </div>
-                </td>
+
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
                     'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
@@ -418,7 +379,6 @@ const mapperList: any = ref({
 const listLoading = ref(false);
 const showServiceDropdown = ref(false);
 const showAvailabilityDropdown = ref(false);
-const serviceSearchQuery = ref('');
 const availabilitySearchQuery = ref('');
 
 const itemsPerPage = ref(10);
@@ -436,11 +396,6 @@ const availabilityOptions = [
   { value: 'not_available', label: 'Not Available' },
 ];
 
-const serviceDisplay = computed(() => {
-  if (!filters.value.service_id) return '';
-  const service = allServices.value.find((s: any) => s.id === filters.value.service_id);
-  return service ? service.name : '';
-});
 
 const availabilityDisplay = computed(() => {
   if (!filters.value.availability) return '';
@@ -448,13 +403,6 @@ const availabilityDisplay = computed(() => {
   return option ? option.label : '';
 });
 
-const filteredServiceOptions = computed(() => {
-  if (!serviceSearchQuery.value) return allServices.value;
-  const query = serviceSearchQuery.value.toLowerCase();
-  return allServices.value.filter((service: any) =>
-    service.name.toLowerCase().includes(query)
-  );
-});
 
 const filteredAvailabilityOptions = computed(() => {
   if (!availabilitySearchQuery.value) return availabilityOptions;
@@ -484,13 +432,7 @@ const visiblePages = computed(() => {
 })
 
 
-const selectService = (value: string) => {
-  filters.value.service_id = value;
-  showServiceDropdown.value = false;
-  serviceSearchQuery.value = '';
-  page.value = 1;
-  fetchStaffs();
-};
+
 
 const selectAvailability = (value: string) => {
   filters.value.availability = value;
@@ -498,10 +440,6 @@ const selectAvailability = (value: string) => {
   availabilitySearchQuery.value = '';
   page.value = 1;
   fetchStaffs();
-};
-
-const filterServiceOptions = (event: Event) => {
-  serviceSearchQuery.value = (event.target as HTMLInputElement).value;
 };
 
 const filterAvailabilityOptions = (event: Event) => {
@@ -609,23 +547,23 @@ const changeItemsPerPage = () => {
 }
 
 const viewStaff = (id: string) => {
-  router.push({ path: '/admin/mappers/view', query: { id } });
+  router.push({ path: '/admin/staff/view', query: { id } });
 };
 
 const addStaff = () => {
-  router.push({ path: '/admin/mappers/add' });
+  router.push({ path: '/admin/staff/add' });
 };
 
 const editStaff = (id: any) => {
-  router.push({ path: '/admin/mappers/edit', query: { id } });
+  router.push({ path: '/admin/staff/edit', query: { id } });
 };
 
 const deleteStaff = async (id: any) => {
   try {
     const result = await Swal.fire({
       icon: 'warning',
-      title: 'Delete mapper',
-      text: 'Are you sure you want to delete this mapper?',
+      title: 'Delete staff',
+      text: 'Are you sure you want to delete this staff?',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete',
       cancelButtonText: 'Cancel',
@@ -640,7 +578,7 @@ const deleteStaff = async (id: any) => {
     fetchStaffs();
     await Swal.fire({
       title: 'Deleted!',
-      text: 'The mapper has been deleted.',
+      text: 'The staff has been deleted.',
       icon: 'success',
       customClass: { container: 'sweet-alerts' },
     });

@@ -14,11 +14,11 @@ export default class StaffService {
   }
 
   protected readonly routes = {
-    GETLIST: '/staff',
-    CREATE: '/staff',
-    UPDATE: '/staff',
-    DELETE: '/staff',
-    EDIT: '/staff',
+    GETLIST: '/managers',
+    CREATE: '/managers',
+    UPDATE: '/managers',
+    DELETE: '/managers',
+    EDIT: '/managers',
     GETPERMISSIONS: '/get-permissions',
   }
 

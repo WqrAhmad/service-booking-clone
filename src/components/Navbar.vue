@@ -7,7 +7,7 @@
           <router-link to="/" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
             <img v-if="generalSettings?.logo" :src="generalSettings.logo" :alt="generalSettings.title || 'Logo'"
               :style="{ width: generalSettings.logo_width + 'px', height: generalSettings.logo_height + 'px' }"
-              class="object-contain " />
+              class="object-contain rounded-lg" />
           </router-link>
         </div>
 
@@ -22,7 +22,7 @@
           <!-- Show these links only when logged in -->
           <template v-if="isLogged">
             <!-- Staff-only: no admin, only profile and dashboard -->
-            <router-link v-if="isStaff" to="/mapper/profile"
+            <router-link v-if="isStaff" to="/staff/profile"
               class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               active-class="text-blue-600 font-semibold">
               Profile
@@ -35,28 +35,28 @@
                 active-class="text-blue-600 font-semibold">
                 Jobs
               </router-link>
-              <router-link v-if="canAccessStaffs" to="/admin/mappers"
+              <router-link v-if="canAccessStaffs" to="/admin/staff"
                 class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 active-class="text-blue-600 font-semibold">
-                Staffs
+                Staff
               </router-link>
               <router-link v-if="canAccessServices" to="/admin/services"
                 class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 active-class="text-blue-600 font-semibold">
                 Services
               </router-link>
-              <!-- <router-link v-if="canAccessStaff" to="/admin/staff"
+              <router-link v-if="canAccessStaff" to="/admin/user"
                 class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 active-class="text-blue-600 font-semibold">
-                Staff
-              </router-link> -->
+                User
+              </router-link>
               <router-link v-if="canAccessDashboard" to="/admin/dashboard"
                 class="hover:text-white hover:bg-green-600 text-white bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 active-class="text-blue-600 font-semibold">
                 Dashboard
               </router-link>
             </template>
-            <router-link v-if="isStaff" to="/mapper/dashboard"
+            <router-link v-if="isStaff" to="/staff/dashboard"
               class="hover:text-white hover:bg-green-600 text-white bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               active-class="text-blue-600 font-semibold">
               Dashboard
@@ -201,6 +201,10 @@
             <span v-if="isAdmin" class="inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded">
               Admin
             </span>
+            <span v-else-if="isManager"
+              class="inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded">
+              Manager
+            </span>
             <span v-else-if="isStaff"
               class="inline-block px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-200 rounded">
               Staff
@@ -241,14 +245,14 @@
                   </svg>
                   Jobs
                 </router-link>
-                <router-link v-if="canAccessStaffs" to="/admin/mappers" @click="closeMobileMenu"
+                <router-link v-if="canAccessStaffs" to="/admin/staff" @click="closeMobileMenu"
                   class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg text-base font-medium transition-colors"
                   active-class="text-blue-600 bg-blue-50">
                   <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Staffs
+                  Staff
                 </router-link>
                 <router-link v-if="canAccessServices" to="/admin/services" @click="closeMobileMenu"
                   class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg text-base font-medium transition-colors"
@@ -259,19 +263,19 @@
                   </svg>
                   Services
                 </router-link>
-                <router-link v-if="canAccessStaff" to="/admin/staff" @click="closeMobileMenu"
+                <router-link v-if="canAccessStaff" to="/admin/user" @click="closeMobileMenu"
                   class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg text-base font-medium transition-colors"
                   active-class="text-blue-600 bg-blue-50">
                   <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
-                  Staff
+                  User
                 </router-link>
               </template>
 
               <!-- Staff-only: Dashboard and Profile -->
-              <router-link v-if="isStaff" to="/mapper/dashboard" @click="closeMobileMenu"
+              <router-link v-if="isStaff" to="/staff/dashboard" @click="closeMobileMenu"
                 class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg text-base font-medium transition-colors"
                 active-class="text-blue-600 bg-blue-50">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +284,7 @@
                 </svg>
                 Dashboard
               </router-link>
-              <router-link v-if="isStaff" to="/mapper/profile" @click="closeMobileMenu"
+              <router-link v-if="isStaff" to="/staff/profile" @click="closeMobileMenu"
                 class="flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg text-base font-medium transition-colors"
                 active-class="text-blue-600 bg-blue-50">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -585,28 +589,53 @@ const isAdmin = computed(() => {
 // Check if user is mapper (no admin permissions)
 const isStaff = computed(() => {
   const userData = user.value as any;
-  return userData?.role?.name?.toLowerCase() === 'mapper';
+  return userData?.role?.name?.toLowerCase() === 'staff';
 });
 
-// Staff: show admin nav only if they have the right permission
-const canAccessAdmin = computed(() => isAdmin.value || isStaff.value);
+// Check if user is manager
+const isManager = computed(() => {
+  const userData = user.value as any;
+  return userData?.role?.name?.toLowerCase() === 'manager';
+});
+
+// Staff/Manager: show admin nav only if they have the right permission
+const canAccessAdmin = computed(() => isAdmin.value || isStaff.value || isManager.value);
 
 const hasPermission = (slug: string): boolean => {
   const userData = user.value as any;
-  if (isAdmin.value || !isStaff.value) return isAdmin.value;
+  if (isAdmin.value) return true;
+  if (!isStaff.value && !isManager.value) return false;
   const perms = userData?.permissions || [];
   const slugLower = slug.toLowerCase();
   return perms.some((p: any) => {
     const name = (p.name || p.type || p.display_name || '').toString().toLowerCase();
-    return name.includes(slugLower) || slugLower.includes(name);
+    const category = (p.category || '').toString().toLowerCase();
+    
+    // Map mapper/staff and user/staff checks properly
+    const isMapperSlug = slugLower === 'mapper';
+    const isStaffSlug = slugLower === 'staff';
+    
+    if (isMapperSlug && (category === 'staff' || name.includes('staff'))) return true;
+    if (isStaffSlug && (category === 'user' || name.includes('user'))) return true;
+
+    return name.includes(slugLower) || slugLower.includes(name) || category.includes(slugLower) || slugLower.includes(category);
   });
 };
 
-const canAccessDashboard = computed(() => isAdmin.value || (isStaff.value && hasPermission('dashboard')));
-const canAccessJobs = computed(() => isAdmin.value || (isStaff.value && hasPermission('job')));
-const canAccessStaffs = computed(() => isAdmin.value || (isStaff.value && hasPermission('mapper')));
-const canAccessServices = computed(() => isAdmin.value || (isStaff.value && hasPermission('service')));
-const canAccessStaff = computed(() => isAdmin.value || (isStaff.value && hasPermission('staff')));
+const canAccessDashboard = computed(() => {
+  if (isAdmin.value) return true;
+  if (isStaff.value || isManager.value) {
+    const hasExplicit = hasPermission('dashboard');
+    if (hasExplicit) return true;
+    const perms = (user.value as any)?.permissions || [];
+    return perms.length > 0;
+  }
+  return false;
+});
+const canAccessJobs = computed(() => isAdmin.value || hasPermission('job'));
+const canAccessStaffs = computed(() => isAdmin.value || hasPermission('mapper'));
+const canAccessServices = computed(() => isAdmin.value || hasPermission('service'));
+const canAccessStaff = computed(() => isAdmin.value || hasPermission('staff'));
 
 // Get user initials for avatar
 const userInitials = computed(() => {

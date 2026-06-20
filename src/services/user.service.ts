@@ -8,19 +8,19 @@ import type {
 } from '@/model/user.model'
 
 export default class UserService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService) { }
 
   public async getCurrentUser(): Promise<IUser> {
     return this.httpService.get<IUser>('user')
   }
 
   protected readonly routes = {
-    GETLIST: '/mappers',
+    GETLIST: '/staff',
     TOGGLEAVAILABILITY: '/toggle-availability',
     CREATE: '/users',
     UPDATE: '/mappers',
     UPDATEPROFILE: '/profile-setup',
-    EDIT: '/mappers',
+    EDIT: '/staff',
     DELETE: '/users',
   }
 
@@ -41,7 +41,7 @@ export default class UserService {
       { someData: 'value' }
     )
   }
-  
+
   public async updateUser(id: any, payload: IUpdateUserRequest): Promise<IUser> {
     // Log payload details for debugging
     if (payload instanceof FormData) {
@@ -52,7 +52,7 @@ export default class UserService {
     } else {
       console.log('Payload object:', payload)
     }
-    
+
     return await this.httpService.post<IUser, IUpdateUserRequest>(
       `${this.routes.UPDATE}/${id}`,
       payload,
@@ -68,7 +68,7 @@ export default class UserService {
     } else {
       console.log('Payload object:', payload)
     }
-    
+
     return await this.httpService.post<IUser, IUpdateUserRequest>(
       `${this.routes.UPDATEPROFILE}/${id}`,
       payload,

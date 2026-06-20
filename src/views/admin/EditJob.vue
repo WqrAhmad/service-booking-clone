@@ -14,38 +14,29 @@
   </div>
 
   <JobFormLayout v-else v-bind="layoutProps" @submit="submitJob" @cancel="router.back()" @lookupVehicle="lookupVehicle"
-    @searchStaffs="searchStaffs" @selectStaff="selectStaff" @openServicesDialog="openServicesDialog"
-    @closeServicesDialog="closeServicesDialog" @selectStaffFromDialog="selectStaffFromDialog"
-    @toggleManualAddress="manualAddress = !manualAddress" @update:showServiceDropdown="showServiceDropdown = $event"
-    @update:showRadiusDropdown="showRadiusDropdown = $event" @addressSelected="onAddressSelected">
+    @toggleManualAddress="manualAddress = !manualAddress" @addressSelected="onAddressSelected">
     <!-- Page Header -->
     <template #header>
       <h1 class="text-3xl font-bold text-gray-900">Edit Job</h1>
       <p class="text-gray-600 mt-2">Update job details and mapper</p>
     </template>
 
-    <!-- Currently assigned mapper banner -->
-    <template #assigned-mapper>
-      <div v-if="!hasSearched && formData.mapperId && formData.mapperName"
-        class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-        <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div>
-          <p class="text-sm font-semibold text-green-800">Currently assigned mapper: {{ formData.mapperName }}</p>
-          <p class="text-xs text-green-600 mt-0.5">Search mappers above to assign a different one, or keep the current
-            assignment.</p>
-        </div>
-      </div>
-    </template>
-
     <!-- Submit Button -->
     <template #submit-button>
-      <button v-if="canAddJob" type="submit" :disabled="submitting"
-        class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-        {{ submitting ? 'Updating...' : 'Update Job' }}
-      </button>
+      <div class="flex items-center gap-3">
+        <a v-if="formData.customerEmail" :href="mailtoLink" target="_blank"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Mail to Customer
+        </a>
+        <button v-if="canAddJob" type="submit" :disabled="submitting"
+          class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          {{ submitting ? 'Updating...' : 'Update Job' }}
+        </button>
+      </div>
     </template>
   </JobFormLayout>
 </template>
@@ -68,26 +59,12 @@ const editJobId = ref<string | null>(null);
 const manualAddress = ref(false);
 
 const {
-  router, formData, searchCriteria, errors, submitting, availableServices,
-  lookupVehicle, searchStaffs, selectStaff,
-  openServicesDialog, closeServicesDialog, selectStaffFromDialog,
-  validateForm, buildJobData, confirmedStaffServices,
+  router, formData, errors, submitting,
+  lookupVehicle,
+  validateForm, buildJobData,
   loadingVehicle, vehicleDetails, engineDetails,
-  loadingStaffs, hasSearched,
-  showServiceDropdown, showRadiusDropdown,
-  serviceTypeDisplay, radiusDisplay,
-  filteredServiceOptions, filteredRadiusOptions,
-  searchResults, selectedServicePlatformFee,
-  servicesDialog, dialogSelectedServices, dialogPlatformFeeOverride,
-  dialogAllSelected, dialogSomeSelected,
-  formatOption, disablePastDates, mergeDateTime,
-  selectService, selectRadius, filterServiceOptions, filterRadiusOptions,
-  getDistance, getStaffLat, getStaffLng, mapperEmbedMapUrl, mapperMapLink,
-  getStaffSelectedServices, getSelectedServicePrice, getTotalQuotedPrice,
-  isCurrentlySelectedService, isDialogServiceSelected,
-  toggleSelectAllServices, toggleDialogService,
-  getDialogServicePrice, setDialogServicePrice,
-  getDialogServicePlatformFee, setDialogServicePlatformFee,
+  formatOption, mergeDateTime,
+  availableServices, availableStaff,
 } = useJobForm();
 
 // Handle address selection emitted from JobFormLayout
@@ -98,53 +75,26 @@ const onAddressSelected = (address: any) => {
   if (errors.value.jobPostcode) delete errors.value.jobPostcode;
 };
 
+// Build mailto link for customer email
+const mailtoLink = computed(() => {
+  const email = formData.value.customerEmail || '';
+  const subject = encodeURIComponent(`Regarding Your Job${editJobId.value ? ` #${editJobId.value}` : ''}`);
+  const body = encodeURIComponent(`Dear ${formData.value.customerName || 'Customer'},\n\n`);
+  return `mailto:${email}?subject=${subject}&body=${body}`;
+});
+
 const layoutProps = computed(() => ({
   isEdit: true,
   formData: formData.value,
-  searchCriteria: searchCriteria.value,
   errors: errors.value,
   loadingVehicle: loadingVehicle.value,
   vehicleDetails: vehicleDetails.value,
   engineDetails: engineDetails.value,
-  loadingStaffs: loadingStaffs.value,
-  hasSearched: hasSearched.value,
-  showServiceDropdown: showServiceDropdown.value,
-  showRadiusDropdown: showRadiusDropdown.value,
-  serviceTypeDisplay: serviceTypeDisplay.value,
-  radiusDisplay: radiusDisplay.value,
-  filteredServiceOptions: filteredServiceOptions.value,
-  filteredRadiusOptions: filteredRadiusOptions.value,
-  searchResults: searchResults.value,
-  selectedServicePlatformFee: selectedServicePlatformFee.value,
-  servicesDialog: servicesDialog.value,
-  dialogSelectedServices: dialogSelectedServices.value,
-  dialogPlatformFeeOverride: dialogPlatformFeeOverride.value,
-  dialogAllSelected: dialogAllSelected.value,
-  dialogSomeSelected: dialogSomeSelected.value,
+  availableServices: availableServices.value,
+  availableStaff: availableStaff.value,
   manualAddress: manualAddress.value,
   formatOption,
-  disablePastDates,
   mergeDateTime,
-  selectService,
-  selectRadius,
-  filterServiceOptions,
-  filterRadiusOptions,
-  getDistance,
-  getStaffLat,
-  getStaffLng,
-  mapperEmbedMapUrl,
-  mapperMapLink,
-  getStaffSelectedServices,
-  getSelectedServicePrice,
-  getTotalQuotedPrice,
-  isCurrentlySelectedService,
-  isDialogServiceSelected,
-  toggleSelectAllServices,
-  toggleDialogService,
-  getDialogServicePrice,
-  setDialogServicePrice,
-  getDialogServicePlatformFee,
-  setDialogServicePlatformFee,
 }));
 
 // ─── Prefill form from job data ───────────────────────────────────────
@@ -182,15 +132,12 @@ const fetchJobAndPrefill = async () => {
     formData.value.customerName = job.customer_name || '';
     formData.value.customerEmail = job.customer_email || '';
     formData.value.customerPhone = job.customer_phone || '';
-
     if (job.scheduled_at) {
       const [datePart, timePart] = job.scheduled_at.split(' ');
       formData.value.scheduledDate = datePart || '';
       formData.value.scheduledTime = timePart ? timePart.substring(0, 5) : '';
       formData.value.scheduled_at = job.scheduled_at;
     }
-
-    // Pre-fill address — switch to manual mode so the postcode field is visible and editable
     if (job.customer_address || job.post_code) {
       manualAddress.value = true;
     }
@@ -199,43 +146,28 @@ const fetchJobAndPrefill = async () => {
     formData.value.jobLatitude = job.latitude != null ? Number(job.latitude) : null;
     formData.value.jobLongitude = job.longitude != null ? Number(job.longitude) : null;
 
-    formData.value.mapperId = String(job.mapper_id ?? job.mapper?.id ?? '');
-    formData.value.mapperName = job.mapper?.name ?? '';
+    formData.value.services = job.job_services.map((service: any) => ({
+      ...service,
+      service_id: service.service_id ?? service.service?.id,
+      qty: service.quantity ?? service.qty ?? 1,
+      price: service.service_price ?? service.price ?? 0,
+      description: service.description ?? '',
+    }));
 
-    const firstServiceId = job.service_ids?.[0] ?? job.service_id ?? job.service?.id;
-    if (firstServiceId) {
-      searchCriteria.value.serviceId = String(firstServiceId);
-      const firstJobSvc = (job.job_services ?? [])[0];
-      searchCriteria.value.serviceName = firstJobSvc?.service?.name ?? job.service?.name ?? '';
-      if (!searchCriteria.value.serviceName && availableServices.value.length) {
-        const found = availableServices.value.find((s: any) => String(s.id) === String(firstServiceId));
-        if (found) searchCriteria.value.serviceName = found.name;
-      }
-    }
+    formData.value.user_id = job.staff?.id ?? job.user_id ?? '';
 
-    const jobServices = job.job_services ?? job.services ?? [];
-    if (jobServices.length && formData.value.mapperId) {
-      confirmedStaffServices.value[formData.value.mapperId] = jobServices.map((s: any) => ({
-        serviceId: Number(s.service_id ?? s.service?.id ?? s.id),
-        serviceRowId: String(s.mapper_service_id ?? s.service_id ?? s.id),
-        serviceName: s.service?.name ?? s.name ?? '',
-        price: Number(s.service_price ?? s.price ?? 0),
-        platformFee: Number(s.platform_fee ?? 0),
-      }));
+  } catch (e) {
+    if (e instanceof AxiosError && e.response?.status === 422) {
+      notificationService.showError(e.response.data.message);
+      return;
     }
-  } catch {
-    notificationService.showError('Failed to load job');
+    if (e instanceof AxiosError && e.response?.status === 400) {
+      notificationService.showError(e.response?.data.message);
+    }
   } finally {
     loadingJob.value = false;
   }
 };
-
-watch(availableServices, (svcs) => {
-  if (searchCriteria.value.serviceId && !searchCriteria.value.serviceName && svcs.length) {
-    const found = svcs.find((s: any) => String(s.id) === String(searchCriteria.value.serviceId));
-    if (found) searchCriteria.value.serviceName = found.name;
-  }
-});
 
 onMounted(() => {
   fetchJobAndPrefill();
@@ -259,7 +191,6 @@ const submitJob = async () => {
         notificationService.showError(error.response.data.message || 'Validation error. Please check all fields.');
       else if (error.response?.status === 401)
         notificationService.showError('Unauthorized. Please log in again.');
-
     }
   } finally {
     submitting.value = false;

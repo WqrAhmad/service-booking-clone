@@ -13,9 +13,8 @@ export const formatDateTime = (date: string | Date | null | undefined): string =
     day: '2-digit',
   });
 
-  const hours = d.getHours();
-  const period = hours < 12 ? 'AM' : 'PM';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
 
-  // Show AM/PM like a small badge next to the date
-  return `${datePart} [${period}]`;
+  return `${datePart} ${hours}:${minutes}`;
 };

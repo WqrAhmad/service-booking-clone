@@ -266,25 +266,33 @@
               <label class="block text-sm font-medium text-gray-500 mb-1">Postcode</label>
               <p class="text-gray-900">{{ jobDetails.post_code }}</p>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-1">Scheduled Date</label>
+              <p class="text-gray-900 font-medium">{{ formattedScheduledDate }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-1">Scheduled Time</label>
+              <p class="text-gray-900 font-medium">{{ formattedScheduledTime }}</p>
+            </div>
             <div class="bg-green-50 rounded-lg p-6 border border-green-200">
               <label class="block text-sm font-medium text-gray-500 mb-1">Assigned Staff</label>
               <div class="flex items-center gap-2 justify-between">
-                <div> <img :src="jobDetails?.mapper?.avatar" alt="Staff Profile Image" class="w-10 h-10 rounded-full">
+                <div> <img :src="jobDetails?.staff?.avatar" alt="Staff Profile Image" class="w-10 h-10 rounded-full">
                 </div>
                 <div>
-                  <p class="text-gray-900">{{ jobDetails?.mapper?.name }}</p>
-                  <p class="text-sm text-gray-500">{{ jobDetails?.mapper?.business_name }}</p>
-                  <p class="text-sm text-gray-500">{{ jobDetails?.mapper?.post_code }}</p>
-                  <p class="text-sm text-gray-500">{{ jobDetails?.mapper?.phone }}</p>
+                  <p class="text-gray-900">{{ jobDetails?.staff?.name }}</p>
+                  <p class="text-sm text-gray-500">{{ jobDetails?.staff?.business_name }}</p>
+                  <p class="text-sm text-gray-500">{{ jobDetails?.staff?.post_code }}</p>
+                  <p class="text-sm text-gray-500">{{ jobDetails?.staff?.phone }}</p>
                 </div>
                 <div>
                   <button :class="[
                     'px-4 py-2 font-medium rounded-lg transition-colors',
-                    jobDetails?.mapper?.available === 'not_available'
+                    jobDetails?.staff?.available === 'not_available'
                       ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'bg-green-600 hover:bg-green-700 text-white'
                   ]">
-                    {{ jobDetails?.mapper?.available === 'not_available' ? 'Not Available' : 'Available' }}
+                    {{ jobDetails?.staff?.available === 'not_available' ? 'Not Available' : 'Available' }}
                   </button>
                 </div>
               </div>
@@ -306,12 +314,12 @@
                 Generate Invoice
               </button>
 
-              <button v-if="canEditJob" @click="generateInvoiceAndShare(jobDetails.id)"
+              <!-- <button v-if="canEditJob" @click="generateInvoiceAndShare(jobDetails.id)"
                 :disabled="isGeneratingAndSharing"
                 class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <span v-if="!isGeneratingAndSharing">Share on WhatsApp</span>
                 <span v-else>Sharing...</span>
-              </button>
+              </button> -->
             </div>
           </div>
 
@@ -325,23 +333,23 @@
               <thead class="bg-gray-100 py-2">
                 <tr>
                   <th class="text-left py-2">Service</th>
-                  <th class="text-left py-2">Service Price</th>
-                  <th class="text-left py-2">Deposit Fee</th>
+                  <th class="text-left py-2">Qty</th>
+                  <th class="text-left py-2">Price</th>
                   <th class="text-left py-2">Total</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(service, index) in jobDetails.job_services" :key="index">
                   <td>{{ service?.service?.name }}</td>
-                  <td>£{{ service?.service_price }}</td>
-                  <td>£{{ service?.platform_fee }}</td>
-                  <td>£{{ service?.service_price + service?.platform_fee }}</td>
+                  <td>{{ service?.qty }}</td>
+                  <td>{{ service?.service_price }}</td>
+                  <td>£{{ service?.qty * service?.service_price }}</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th colspan="3" class="text-right py-2 pe-5 ">Total</th>
-                  <td class="text-left py-2">£{{ jobDetails.total_amount }}</td>
+                  <td class="text-left py-2">£{{ grandTotal.toFixed(2) }}</td>
                 </tr>
               </tfoot>
             </table>
@@ -437,13 +445,34 @@ import { AxiosError } from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { useStaffPermissions } from '@/composables/useStaffPermissions';
 import { useAppStore } from '@/stores';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 const { canEdit } = useStaffPermissions();
 const canEditJob = computed(() => canEdit('job'));
 const appStore = useAppStore();
+
+const formattedScheduledDate = computed(() => {
+  const raw = jobDetails.value?.scheduled_at;
+  if (!raw) return '—';
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? raw : d.toLocaleDateString('en-GB', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  });
+});
+
+const formattedScheduledTime = computed(() => {
+  const raw = jobDetails.value?.scheduled_at;
+  if (!raw) return '—';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return '—';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+});
 const isLoading = ref(false);
 const isGeneratingInvoice = ref(false);
-const isGeneratingAndSharing = ref(false);
+// const isGeneratingAndSharing = ref(false);
 const isLookingUp = ref(false);
 const showVehicleDetails = ref(false);
 const copied = ref(false);
@@ -533,44 +562,44 @@ const generateInvoice = async (options: { open?: boolean } = { open: true }) => 
 
 
 
-const generateInvoiceAndShare = async (jobId: any) => {
-  if (isGeneratingAndSharing.value) return;
+// const generateInvoiceAndShare = async (jobId: any) => {
+//   if (isGeneratingAndSharing.value) return;
 
-  try {
-    isGeneratingAndSharing.value = true;
+//   try {
+//     isGeneratingAndSharing.value = true;
 
-    const result = await Swal.fire({
-      icon: 'question',
-      title: 'Share on WhatsApp?',
-      text: 'Are you sure you want to share the invoice to the customer?',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Share',
-      cancelButtonText: 'Cancel',
-      padding: '2em',
-      customClass: { container: 'sweet-alerts' },
-    });
+//     const result = await Swal.fire({
+//       icon: 'question',
+//       title: 'Share on WhatsApp?',
+//       text: 'Are you sure you want to share the invoice to the customer?',
+//       showCancelButton: true,
+//       confirmButtonText: 'Yes, Share',
+//       cancelButtonText: 'Cancel',
+//       padding: '2em',
+//       customClass: { container: 'sweet-alerts' },
+//     });
 
-    if (result.value) {
-      const payload: any = {
-        job_id: jobId,
-      };
-      const res: any = await jobService.shareOnWhatsApp(payload);
-      notificationService.showSuccess(res.message);
-      window.open(res.whatsapp_url, '_blank');
-    }
-  } catch (e) {
-    if (e instanceof AxiosError && e.response?.status === 422) {
-      notificationService.showError(e.response.data.message);
-      return;
-    }
-    if (e instanceof AxiosError && e.response?.status === 401) {
-      notificationService.showError(e.response.data.message);
-      return;
-    }
-  } finally {
-    isGeneratingAndSharing.value = false;
-  }
-};
+//     if (result.value) {
+//       const payload: any = {
+//         job_id: jobId,
+//       };
+//       const res: any = await jobService.shareOnWhatsApp(payload);
+//       notificationService.showSuccess(res.message);
+//       window.open(res.whatsapp_url, '_blank');
+//     }
+//   } catch (e) {
+//     if (e instanceof AxiosError && e.response?.status === 422) {
+//       notificationService.showError(e.response.data.message);
+//       return;
+//     }
+//     if (e instanceof AxiosError && e.response?.status === 401) {
+//       notificationService.showError(e.response.data.message);
+//       return;
+//     }
+//   } finally {
+//     isGeneratingAndSharing.value = false;
+//   }
+// };
 
 
 const closeManualPaymentModal = () => {
@@ -675,4 +704,11 @@ const fetchEngineDetails = async (engineId: string) => {
 const goToJobSheet = (id: string) => {
   router.push({ path: '/admin/jobs/job-sheet', query: { id } });
 };
+const grandTotal = computed(() => {
+  return (jobDetails.value?.job_services || []).reduce((sum, service) => {
+    const qty = Number(service?.qty) || 0
+    const price = Number(service?.service_price) || 0
+    return sum + qty * price
+  }, 0)
+})
 </script>

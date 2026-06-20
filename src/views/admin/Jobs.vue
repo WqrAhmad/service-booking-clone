@@ -287,10 +287,14 @@
                         class="block w-full text-left px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50">
                         Edit
                       </button>
-                      <button v-if="canAddJob" type="button" @click.stop="closeAndRun(() => duplicateJob(job.id))"
-                        class="block w-full text-left px-4 py-2 text-sm text-amber-600 hover:bg-amber-50">
-                        Duplicate
+                      <!-- duplicate job -->
+                      <button v-if="canListJobs" type="button" @click.stop="closeAndRun(() => duplicateJob(job.id))"
+                        class="block w-full text-left px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50">
+                        Duplicate Job
                       </button>
+
+
+
                       <button v-if="canListJobs" type="button" @click.stop="closeAndRun(() => viewJob(job.id))"
                         class="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50">
                         View
@@ -304,14 +308,7 @@
                         class="block w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50">
                         Resend Invoice
                       </button>
-                      <!-- <button
-                       
-                        type="button"
-                        @click.stop="closeAndRun(() => shareOnWhatsApp(job.id))"
-                        class="block w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50"
-                      >
-                      Share on WhatsApp
-                      </button> -->
+
                     </div>
                   </div>
                 </td>
@@ -346,8 +343,8 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ job.mapper?.name || '' }}</div>
-                  <div class="text-sm text-gray-500">{{ job.mapper?.business_name || '-' }}</div>
+                  <div class="text-sm text-gray-900">{{ job.staff?.name || '' }}</div>
+                  <div class="text-sm text-gray-500">{{ job.staff?.business_name || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ formatDateTime(job.scheduled_at) }}

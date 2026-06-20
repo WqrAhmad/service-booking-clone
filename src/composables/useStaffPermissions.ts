@@ -15,6 +15,7 @@ export function useStaffPermissions() {
 
   const isAdmin = computed(() => (user.value?.role?.name ?? '').toString().toLowerCase() === 'admin')
   const isStaff = computed(() => (user.value?.role?.name ?? '').toString().toLowerCase() === 'staff')
+  const isManager = computed(() => (user.value?.role?.name ?? '').toString().toLowerCase() === 'manager')
 
   const userPermissions = computed(() => {
     const perms = user.value?.permissions
@@ -24,7 +25,7 @@ export function useStaffPermissions() {
   /** Check if the user has a permission for the given module and action */
   function hasPermission(module: PermissionModule, action: PermissionAction): boolean {
     if (isAdmin.value) return true
-    if (!isStaff.value) return false
+    if (!isStaff.value && !isManager.value) return false
 
     const perms = userPermissions.value
     const moduleLower = module.toLowerCase()
@@ -33,7 +34,20 @@ export function useStaffPermissions() {
     return perms.some((p: any) => {
       const name = (p.name ?? p.type ?? '').toString().toLowerCase()
       const displayName = (p.display_name ?? '').toString().toLowerCase()
-      const moduleMatch = name.includes(moduleLower) || moduleLower.includes(name)
+      const category = (p.category ?? '').toString().toLowerCase()
+
+      // Map module values
+      const isMapperModule = moduleLower === 'mapper'
+      const isStaffModule = moduleLower === 'staff'
+
+      if (isMapperModule && (category === 'staff' || name.includes('staff'))) {
+        return displayName === actionLower
+      }
+      if (isStaffModule && (category === 'user' || name.includes('user'))) {
+        return displayName === actionLower
+      }
+
+      const moduleMatch = name.includes(moduleLower) || moduleLower.includes(name) || category.includes(moduleLower) || moduleLower.includes(category)
       const actionMatch = displayName === actionLower
       return moduleMatch && actionMatch
     })
@@ -47,6 +61,7 @@ export function useStaffPermissions() {
   return {
     isAdmin,
     isStaff,
+    isManager,
     canList,
     canAdd,
     canEdit,

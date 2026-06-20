@@ -4,17 +4,15 @@
 
       <!-- Top Bar (hidden on print) -->
       <div class="mb-4 flex items-center justify-between no-print">
-        <button @click="$router.back()" class="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-medium">
+        <button @click="$router.back()"
+          class="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-medium">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           Back to Job
         </button>
-        <button
-          @click="printSheet"
-          :disabled="isLoading"
-          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors shadow disabled:opacity-50"
-        >
+        <button @click="printSheet" :disabled="isLoading"
+          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors shadow disabled:opacity-50">
           Print / Save PDF
         </button>
       </div>
@@ -22,8 +20,8 @@
       <!-- Loading -->
       <div v-if="isLoading" class="bg-white rounded-2xl shadow-lg p-16 text-center">
         <svg class="animate-spin w-8 h-8 text-blue-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
         <p class="text-gray-500 text-sm">Loading job sheet...</p>
       </div>
@@ -46,7 +44,12 @@
               <h1 class="text-xl font-extrabold text-gray-900 tracking-tight uppercase">Job Sheet</h1>
               <p class="text-sm text-gray-500 mt-0.5">Ref: {{ jobDetails.job_number }}</p>
             </div>
-           
+            <span :class="[
+              'px-3 py-1 inline-flex text-xs font-semibold rounded-full uppercase tracking-wide',
+              getStatusClass(jobDetails.status)
+            ]">
+              {{ jobDetails.status ?? '—' }}
+            </span>
           </div>
         </div>
 
@@ -101,7 +104,8 @@
                 <tr class="leading-7">
                   <td class="font-semibold text-gray-800 pr-3 whitespace-nowrap">VRN:</td>
                   <td>
-                    <span class="inline-block bg-yellow-400 text-black font-extrabold px-3 py-0.5 rounded text-sm tracking-widest">
+                    <span
+                      class="inline-block bg-yellow-400 text-black font-extrabold px-3 py-0.5 rounded text-sm tracking-widest">
                       {{ jobDetails.registration ?? '—' }}
                     </span>
                   </td>
@@ -118,8 +122,8 @@
               <p class="text-sm font-bold text-gray-800">Vehicle Technical Data</p>
               <div v-if="isLookingUp" class="flex items-center gap-2 text-xs text-blue-500 no-print">
                 <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Looking up vehicle...
               </div>
@@ -166,32 +170,60 @@
           </div>
         </div>
 
+        <!-- Assigned Staff -->
+        <div v-if="jobDetails.staff" class="px-8 py-6 border-b border-gray-100">
+          <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">Assigned Technician</p>
+          <div class="bg-gray-50 rounded-xl p-5 flex items-center gap-4">
+            <img v-if="jobDetails.staff?.avatar" :src="jobDetails.staff.avatar" alt="Staff Profile Image"
+              class="w-12 h-12 rounded-full object-cover shrink-0" />
+            <div class="flex-1 grid grid-cols-2 gap-y-1 text-sm">
+              <div class="font-bold text-gray-900 col-span-2">{{ jobDetails.staff?.name ?? '—' }}</div>
+              <div class="text-gray-500">{{ jobDetails.staff?.business_name ?? '—' }}</div>
+              <div class="text-gray-500">{{ jobDetails.staff?.phone ?? '—' }}</div>
+              <div class="text-gray-500 col-span-2">{{ jobDetails.staff?.post_code ?? '—' }}</div>
+            </div>
+            <span :class="[
+              'px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap no-print',
+              jobDetails.staff?.available === 'not_available'
+                ? 'bg-red-100 text-red-700'
+                : 'bg-green-100 text-green-700'
+            ]">
+              {{ jobDetails.staff?.available === 'not_available' ? 'Not Available' : 'Available' }}
+            </span>
+          </div>
+        </div>
+
         <!-- Service Description Table -->
         <div class="px-8 py-6 border-b border-gray-100">
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-gray-200">
-                <th class="text-left font-bold text-gray-900 pb-3 ">Service Description</th>
-                <th class="text-left font-bold text-gray-900 pb-3">Service Price</th>
-                <th class="text-left font-bold text-gray-900 pb-3">Deposit Fee</th>
+                <th class="text-left font-bold text-gray-900 pb-3">Service Description</th>
+                <th class="text-left font-bold text-gray-900 pb-3">Qty</th>
+                <th class="text-left font-bold text-gray-900 pb-3">Unit Price</th>
                 <th class="text-left font-bold text-gray-900 pb-3">Total</th>
               </tr>
             </thead>
             <tbody>
-              <!-- Primary service from job -->
               <tr class="border-b border-gray-100" v-for="(service, index) in jobDetails.job_services" :key="index">
                 <td class="py-4 text-gray-600">{{ service?.service?.name ?? '—' }}</td>
-                <td class="py-4 text-left">£{{ service?.service_price ?? '—' }}</td>
-                <td class="py-4 text-left">£{{ service?.platform_fee ?? '—' }}</td>
-                <td class="py-4 text-left">£{{ (service?.service_price || 0) + (service?.platform_fee || 0) }}</td>
+                <td class="py-4 text-left text-gray-600">{{ service?.qty ?? 1 }}</td>
+                <td class="py-4 text-left">£{{ formatMoney(service?.service_price) }}</td>
+                <td class="py-4 text-left font-medium text-gray-900">
+                  £{{ formatMoney((service?.qty ?? 1) * (service?.service_price ?? 0)) }}
+                </td>
               </tr>
-             
+              <tr v-if="!jobDetails.job_services || jobDetails.job_services.length === 0">
+                <td colspan="4" class="py-4 text-center text-gray-400">No services listed</td>
+              </tr>
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="3" class="text-right py-2 pe-5 font-black ">Total outstanding :</td>
-                <td class="text-left py-2">£{{ totalOutstandingAmount.toFixed(2) }}</td>
+                <td colspan="3" class="text-right py-2 pe-5 font-black">Grand Total:</td>
+                <td class="text-left py-2 font-black">£{{ grandTotal.toFixed(2) }}</td>
               </tr>
+
+
             </tfoot>
           </table>
         </div>
@@ -224,14 +256,14 @@ import { jobService, notificationService } from '@/services/_singletons';
 import { AxiosError } from 'axios';
 
 // ── State ─────────────────────────────────────────────────────────────────────
-const route       = useRoute();
-const isLoading   = ref(false);
+const route = useRoute();
+const isLoading = ref(false);
 const isLookingUp = ref(false);
-const error       = ref('');
+const error = ref('');
 
-const jobDetails: any  = ref(null);
+const jobDetails: any = ref(null);
 const vehicleData: any = ref(null);   // from /resolve
-const engineData: any  = ref(null);   // from /getEngineDetails
+const engineData: any = ref(null);   // from /getEngineDetails
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 onMounted(() => loadData());
@@ -321,24 +353,29 @@ const vehicleInfo = computed(() => {
   // Year: find a 4-digit year anywhere in the fullname
   const yearMatch = fullname.match(/\b(19|20)\d{2}\b/);
 
+  // Show tuned power alongside stock when a tune has been applied
+  const stockPower = ed?.horsepower_original;
+  const tunedPower = ed?.horsepower_white;
+  let powerLabel = '—';
+  if (stockPower != null && tunedPower != null && tunedPower !== stockPower) {
+    powerLabel = `${stockPower} hp → ${tunedPower} hp`;
+  } else if (stockPower != null) {
+    powerLabel = `${stockPower} hp`;
+  }
+
   return {
-    energy:   specz?.energy                         ?? '—',
-    model:    makeModel                              || jobDetails.value?.vehicle_model  || '—',
-    year:     yearMatch?.[0]                         ?? '—',
-    engine:   specz?.engine_number                  ?? '—',
-    color:    specz?.colour ?? specz?.color          ?? jobDetails.value?.vehicle_color  ?? '—',
-    fuel:     specz?.energy                         ?? '—',
-    gearbox:  specz?.method                         ?? '—',
+    energy: specz?.energy ?? '—',
+    model: makeModel || jobDetails.value?.vehicle_model || '—',
+    year: yearMatch?.[0] ?? '—',
+    engine: specz?.engine_number ?? '—',
+    color: specz?.colour ?? specz?.color ?? jobDetails.value?.vehicle_color ?? '—',
+    fuel: specz?.energy ?? '—',
+    gearbox: specz?.method ?? '—',
     capacity: specz?.['Cylinder content'] ?? specz?.capacity ?? '—',
-    power:    ed?.horsepower_original != null
-                ? `${ed.horsepower_original} hp`
-                : '—',
-    ecu:      specz?.engine_ecu                     ?? '—',
+    power: powerLabel,
+    ecu: specz?.engine_ecu ?? '—',
   };
 });
-
-
-
 
 // ── Computed: Extract town from address string ────────────────────────────────
 const extractedTown = computed(() => {
@@ -368,25 +405,72 @@ const formattedTime = computed(() => {
   if (!raw) return '—';
   const d = new Date(raw);
   if (isNaN(d.getTime())) return '—';
-  const hours = d.getHours();
-  return hours < 12 ? 'AM' : 'PM';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 });
 
-  const totalOutstandingAmount = computed(() => {
-    return jobDetails.value?.job_services?.reduce((acc: number, service: any) => acc + (service?.service_price ?? 0), 0) ?? 0;
-  });
+// ── Computed: Money formatting ────────────────────────────────────────────────
+const formatMoney = (value: any): string => {
+  const n = Number(value) || 0;
+  return n.toFixed(2);
+};
+
+// ── Computed: Totals (qty-aware, mirrors Job Details grandTotal logic) ────────
+const grandTotal = computed(() => {
+  return (jobDetails.value?.job_services || []).reduce((sum: number, service: any) => {
+    const qty = Number(service?.qty) || 1;
+    const price = Number(service?.service_price) || 0;
+    return sum + qty * price;
+  }, 0);
+});
+
+// const totalPlatformFee = computed(() => {
+//   return (jobDetails.value?.job_services || []).reduce((sum: number, service: any) => {
+//     return sum + (Number(service?.platform_fee) || 0);
+//   }, 0);
+// });
+
+// const totalOutstandingAmount = computed(() => {
+//   return grandTotal.value + totalPlatformFee.value;
+// });
+
+// ── Status badge styling (mirrors Job Details page) ──────────────────────────
+const getStatusClass = (status: string) => {
+  const classes: Record<string, string> = {
+    pending: 'bg-gray-100 text-gray-800',
+    assigned: 'bg-blue-100 text-blue-800',
+    in_progress: 'bg-yellow-100 text-yellow-800',
+    completed: 'bg-green-100 text-green-800',
+    paid: 'bg-purple-100 text-purple-800',
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800';
+};
+
 // ── Print ─────────────────────────────────────────────────────────────────────
 const printSheet = () => window.print();
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-* { font-family: 'Inter', sans-serif; }
+
+* {
+  font-family: 'Inter', sans-serif;
+}
 
 @media print {
-  .no-print { display: none !important; }
-  body { background: white !important; }
-  #job-sheet { box-shadow: none !important; border-radius: 0 !important; }
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  #job-sheet {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
 
   /* Force green background to print */
   .bg-green-500 {

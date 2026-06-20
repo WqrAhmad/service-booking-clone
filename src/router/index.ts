@@ -50,13 +50,13 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/cookie-policy', component: CookiePolicy, meta: { public: true } },
 
     // Mapper routes (protected)
-    { path: '/mapper/profile', component: MapperProfile, meta: { requiresAuth: true } },
-    { path: '/mapper/dashboard', component: MapperDashboard, meta: { requiresAuth: true } },
-    { path: '/mapper/jobs/:id', component: MapperJobDetail, meta: { requiresAuth: true } },
+    { path: '/staff/profile', component: MapperProfile, meta: { requiresAuth: true } },
+    { path: '/staff/dashboard', component: MapperDashboard, meta: { requiresAuth: true } },
+    { path: '/staff/jobs/:id', component: MapperJobDetail, meta: { requiresAuth: true } },
 
     // Admin routes (protected)
     { path: '/admin/dashboard', component: AdminDashboard, meta: { requiresAuth: true } },
-    { path: '/admin/search-mappers', component: AdminSearchMappers, meta: { requiresAuth: true } },
+    { path: '/admin/search-staff', component: AdminSearchMappers, meta: { requiresAuth: true } },
     { path: '/admin/create-job', component: AdminCreateJob, meta: { requiresAuth: true } },
     { path: '/admin/edit-job', component: AdminEditJob, meta: { requiresAuth: true } },
     { path: '/admin/duplicate-job', component: AdminDuplicateJob, meta: { requiresAuth: true } },
@@ -64,12 +64,12 @@ const routes: Array<RouteRecordRaw> = [
     { path: '/admin/jobs/view', component: AdminJobDetail, meta: { requiresAuth: true } },
     { path: '/admin/jobs/job-sheet', component: AdminJobSheet, meta: { requiresAuth: true } },
     { path: '/admin/invoice/:id', component: AdminInvoice, meta: { requiresAuth: true } },
-    { path: '/admin/mappers', component: AdminManageMappers, meta: { requiresAuth: true } },
-    { path: '/admin/mappers/add', component: AdminMapperAdd, meta: { requiresAuth: true } },
-    { path: '/admin/mappers/view', component: AdminMapperView, meta: { requiresAuth: true } },
-    { path: '/admin/mappers/edit', component: AdminMapperEdit, meta: { requiresAuth: true } },
+    { path: '/admin/staff', component: AdminManageMappers, meta: { requiresAuth: true } },
+    { path: '/admin/staff/add', component: AdminMapperAdd, meta: { requiresAuth: true } },
+    { path: '/admin/staff/view', component: AdminMapperView, meta: { requiresAuth: true } },
+    { path: '/admin/staff/edit', component: AdminMapperEdit, meta: { requiresAuth: true } },
     { path: '/admin/services', component: AdminManageServices, meta: { requiresAuth: true } },
-    { path: '/admin/staff', component: AdminManageStaff, meta: { requiresAuth: true } },
+    { path: '/admin/user', component: AdminManageStaff, meta: { requiresAuth: true } },
     { path: '/admin/settings', component: AdminPlatformSettings, meta: { requiresAuth: true } },
     // Public payment page for customers
     { path: '/payment/:id', component: PaymentPage, meta: { public: true } },

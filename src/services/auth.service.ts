@@ -27,7 +27,7 @@ export default class AuthService {
     LOGIN: '/login',
     SIGNUP: '/register',
     REGISTER_OTP: '/verify-mapper-otp',
-    REGISTER_MAPPER: '/register-mappers',
+    REGISTER_MAPPER: '/register-staff',
     LOGOUT: '/logout',
     FORGOT_PASSWORD: '/send-password-reset-code',
     RESET_PASSWORD: '/password-reset',
@@ -55,8 +55,8 @@ export default class AuthService {
   public async onRejected(error: AxiosError | unknown): Promise<void> {
     if (
       error instanceof AxiosError
-            && error?.response?.status
-            && [401, 403].includes(error.response.status)
+      && error?.response?.status
+      && [401, 403].includes(error.response.status)
     ) {
       notificationService.showError(error.response.data.message)
 
@@ -74,7 +74,7 @@ export default class AuthService {
   }
 
   public async login(login: string, password: string, rememberMe: boolean):
-  Promise<ILoginResponse> {
+    Promise<ILoginResponse> {
     const response: ILoginResponse = await this.httpService.post<ILoginResponse, ILoginRequest>(this.routes.LOGIN, {
       login,
       password,
@@ -119,7 +119,7 @@ export default class AuthService {
     await AuthService.setLocalStorageToken(rememberMe, token)
     useAppStore().setUser(ResUser)
     useAppStore().setLogin()
-  
+
     return response;
   }
   public async sendOpt(code: string, email: string): Promise<IOptResponse> {
@@ -174,7 +174,7 @@ export default class AuthService {
   }
 
   // eslint-disable-next-line camelcase
-  public async resetPassword(email:string, password: string, password_confirmation: string): Promise<void> {
+  public async resetPassword(email: string, password: string, password_confirmation: string): Promise<void> {
     return this.httpService.post<void, IResetPasswordRequest>(this.routes.RESET_PASSWORD, {
       email,
       password,
@@ -182,7 +182,7 @@ export default class AuthService {
     })
   }
   public async updatePassword(payload: any): Promise<void> {
-    return this.httpService.post<void, IUpdatePasswordRequest>(this.routes.UPDATEPASSWORD,payload)
+    return this.httpService.post<void, IUpdatePasswordRequest>(this.routes.UPDATEPASSWORD, payload)
   }
   public async updateProfile(payload: any): Promise<void> {
     return this.httpService.post<void, IUpdateProfileRequest>(this.routes.UPDATEPROFILE,
